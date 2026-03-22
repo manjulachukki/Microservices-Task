@@ -2,6 +2,15 @@ const express = require('express');
 const app = express();
 const port = 3001;
 
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  res.on('finish', () => {
+    const durationMs = Date.now() - startedAt;
+    console.log(`${new Date().toISOString()} product-service ${req.method} ${req.originalUrl} -> ${res.statusCode} ${durationMs}ms`);
+  });
+  next();
+});
+
 app.get('/health', (req, res) => {
   res.json({ status: 'Product Service is healthy' });
 });

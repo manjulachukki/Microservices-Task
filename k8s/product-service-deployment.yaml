@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-service
+  labels:
+    app.kubernetes.io/name: product-service
+    app.kubernetes.io/part-of: microservices-task
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: product-service
+  template:
+    metadata:
+      labels:
+        app: product-service
+        app.kubernetes.io/name: product-service
+        app.kubernetes.io/part-of: microservices-task
+    spec:
+      containers:
+        - name: product-service
+          image: product-service:1.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3001
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "3001"
+            - name: SERVICE_NAME
+              value: product-service
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3

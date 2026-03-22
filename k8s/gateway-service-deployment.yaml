@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-service
+  labels:
+    app.kubernetes.io/name: gateway-service
+    app.kubernetes.io/part-of: microservices-task
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway-service
+  template:
+    metadata:
+      labels:
+        app: gateway-service
+        app.kubernetes.io/name: gateway-service
+        app.kubernetes.io/part-of: microservices-task
+    spec:
+      containers:
+        - name: gateway-service
+          image: gateway-service:1.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3003
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "3003"
+            - name: SERVICE_NAME
+              value: gateway-service
+            - name: USER_SERVICE_URL
+              value: http://user-service:3000
+            - name: PRODUCT_SERVICE_URL
+              value: http://product-service:3001
+            - name: ORDER_SERVICE_URL
+              value: http://order-service:3002
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3

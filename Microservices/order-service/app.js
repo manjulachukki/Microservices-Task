@@ -4,6 +4,15 @@ const app = express();
 app.use(express.json());
 const port = 3002;
 
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  res.on('finish', () => {
+    const durationMs = Date.now() - startedAt;
+    console.log(`${new Date().toISOString()} order-service ${req.method} ${req.originalUrl} -> ${res.statusCode} ${durationMs}ms`);
+  });
+  next();
+});
+
 const orders = [];
 
 app.get('/health', (req, res) => {
